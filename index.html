@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animal Classifier</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        label {
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        input[type="file"] {
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #fff;
+        }
+
+        #preview {
+            display: none;
+            max-width: 100%;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        #result {
+            font-size: 24px;
+            color: #333;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>ANIMAL CLASSIFIER</h1>
+
+    <label for="ImageInput" class="form-label">Select an Image:</label>
+    <input type="file" id="ImageInput" accept="image/*" class="form-control">
+
+    <img src="#" id="preview" alt="Preview">
+
+    <h2 id="result"></h2>
+
+    <script>
+
+
+        url = "https://api-inference.huggingface.co/models/Falcom/animal-classifier"
+
+
+
+        let token
+
+        document.getElementById("preview").style.display = 'none'
+
+       
+        
+
+
+        document.getElementById("ImageInput").addEventListener("change", function (event) {
+
+            let max = 0
+            let res
+
+            const file = event.target.files[0]
+            const reader = new FileReader()
+
+            reader.addEventListener("load", () => {
+
+                document.getElementById("preview").setAttribute("src", reader.result)
+                document.getElementById("preview").style.display = 'block'
+
+            })
+
+            reader.readAsDataURL(file)
+
+            reader.onloadend = () => {
+
+                const data = {
+
+                    inputs: {
+                        image: reader.result.split(",")[1]
+                    }
+
+                }
+
+
+
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        "Authorization": "Bearer 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",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(data)
+                })
+                    .then(response => response.json())
+                    .then(data => {
+
+                        for (i = 0; i < data.length; i++) {
+
+                            if (data[i].score > max) {
+
+                                max = data[i].score
+                                res = data[i].label
+
+                            }
+                        }
+
+                        document.getElementById("result").innerText = res
+                    })
+                    .catch((e) => {
+                        console.log(e)
+                    })
+
+            }
+
+        })
+
+
+
+    </script>
+
+</body>
+
+</html>
